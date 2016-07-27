@@ -7,7 +7,7 @@
 @File    : jieba_tokenizer.py
 @notes   :
 """
-unlabeled_statuses_txt = '../data/unlabeled_statuses.txt'
+unlabeled_statuses_txt = '../../data/unlabeled_statuses.txt'
 train_status_txt = '/home/shield/Competitions/smp-userProfile/train/train_status.txt'
 
 import pandas as pd
