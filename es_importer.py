@@ -13,7 +13,7 @@ north = [u'河北', u'山西', u'内蒙古', u'北京', u'天津']
 east = [u'山东', u'江苏', u'安徽', u'浙江', u'台湾', u'福建', u'江西', u'上海']
 center = [u'河南', u'湖北', u'湖南']
 south = [u'广东', u'广西', u'海南', u'香港', u'澳门']
-south_west = [u'云南', u'贵州', u'四川', u'西藏',u'重庆']
+south_west = [u'云南', u'贵州', u'四川', u'西藏', u'重庆']
 north_west = [u'新疆', u'陕西', u'宁夏', u'青海', u'甘肃']
 
 mapping = {
@@ -65,6 +65,9 @@ mapping = {
                     'type': 'long'
                 },
                 'review_count': {
+                    'type': 'long'
+                },
+                'night_count': {
                     'type': 'long'
                 },
                 'status': {
@@ -188,6 +191,7 @@ def status_actions(status_file):
         'uid': '0',
         'retweet_count': 0,
         'review_count': 0,
+        'night_count': 0,
         'status': []
     }
     for line in status_file:
@@ -208,6 +212,7 @@ def status_actions(status_file):
                 'status': [],
                 'retweet_count': 0,
                 'review_count': 0,
+                'night_count': 0,
             }
         try:
             hour = time.strptime(weibo[4], '%Y-%m-%d %H:%M:%S').tm_hour
@@ -217,6 +222,8 @@ def status_actions(status_file):
             except ValueError:
                 hour = -1
                 print weibo[4]
+        if 0 <= hour <= 5:
+            doc['night_count'] += 1
         doc['status'].append({
             'retweet_count': int(weibo[1]),
             'review_count': int(weibo[2]),
