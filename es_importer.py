@@ -146,6 +146,8 @@ def labels_actions(labels_file):
             location = u'西南'
         elif locations[0] in south:
             location = u'华南'
+        elif locations[0] in north_west:
+            location = u'西北'
         else:
             location = u'境外'
         doc = {
