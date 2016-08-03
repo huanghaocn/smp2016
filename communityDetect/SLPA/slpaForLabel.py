@@ -81,7 +81,7 @@ class Slpa:
             self.labels_memory_dict[uid]['gender'] = {}
             self.labels_memory_dict[uid]['age'] = {}
             self.labels_memory_dict[uid]['area'] = {}
-            self.neighbors_list_dict[uid] = set([i for i in self.train_uid_set][0:5])  # for debug
+            # self.neighbors_list_dict[uid] = set([i for i in self.train_uid_set][0:5])  # for debug
 
         print "self.labels_memory has length %d" % len(self.labels_memory_dict)
 
@@ -103,9 +103,9 @@ class Slpa:
             else:
                 neighborsListDict[uid1] = set()
                 neighborsListDict[uid1].add(uid2)
-            if len(neighborsListDict) == 1000: break  # for debug
-        for u in self.test_label_dict:  # for debug
-            neighborsListDict[u] = set()
+        #     if len(neighborsListDict) == 1000: break  # for debug
+        # for u in self.test_label_dict:  # for debug
+        #     neighborsListDict[u] = set()
         input.close()
         return neighborsListDict
 
@@ -205,13 +205,13 @@ class Slpa:
 
 def main():
     start_time = time.time()
-    slpa = Slpa("F:\\allDataProcess\\neighborPairs.txt", "F:\\allDataProcess\\label_maps.csv",
-                "F:\\allDataProcess\\smp cup data\\test\\test_nolabels.txt")
+    slpa = Slpa("../dataProcess/smpData/neighborPairs2Side.txt", "../dataProcess/smpData/label_maps.csv",
+                "../dataProcess/smpData/test/test_nolabels.txt")
     end_time = time.time()
     print("Elapsed time for initialization was %g seconds" % (end_time - start_time))
 
     start_time = time.time()
-    slpa.perform_slpa(20)  # perform slpa for 20 iterations
+    slpa.perform_slpa(200)  # perform slpa for 200 iterations
     end_time = time.time()
     print("Elapsed time for slpa was %g seconds" % (end_time - start_time))
 
