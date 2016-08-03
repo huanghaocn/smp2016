@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 '''
-Created on Oct 12, 2013
-
-@author: yiping
+@author: qibai
 '''
 
 import numpy as np
@@ -26,7 +24,7 @@ class Slpa:
 
     """
 
-    def __init__(self, input_file, train_label_file, test_label_file, header_line=True):
+    def __init__(self, input_file, train_label_file, test_label_file, mapNum, header_line=True):
         """Initialize the instance with input data
 
         create adjacency_list after reading the input file
@@ -44,13 +42,13 @@ class Slpa:
             self.test_label_dict[uid]['age'] = 0
             self.test_label_dict[uid]['area'] = 0
         f.close()
-        self.neighbors_list_dict = self.get_neigbors(input_file)
-        self.N = len(self.neighbors_list_dict)
+
+        self.neghbors_list_bigmap = self.get_neigbors_big_map(input_file, mapNum)
+        self.N = self.neghbors_list_bigmap.getLenght()
         print "self.train_label has length %d" % self.N
         print "self.test_label has length %d" % len(self.test_label_dict)
         # node's memory
-        self.labels_memory_dict = {}
-
+        self.labels_memory_bigmap = bigMap(mapNum)
         # init for train data
         f = open(train_label_file, "r")
         self.train_uid_set = set()
@@ -64,26 +62,27 @@ class Slpa:
             gender = user_profile[1]
             age = user_profile[2]
             area = user_profile[3]
-            self.labels_memory_dict[uid] = {}
-            self.labels_memory_dict[uid]['gender'] = {}
-            self.labels_memory_dict[uid]['age'] = {}
-            self.labels_memory_dict[uid]['area'] = {}
-            self.labels_memory_dict[uid]['gender'][gender] = 1
-            self.labels_memory_dict[uid]['age'][age] = 1
-            self.labels_memory_dict[uid]['area'][area] = 1
+            self.labels_memory_bigmap.insert(uid, dict())
+            self.labels_memory_bigmap.getMap(uid)['gender'] = {}
+            self.labels_memory_bigmap.getMap(uid)['age'] = {}
+            self.labels_memory_bigmap.getMap(uid)['area'] = {}
+            self.labels_memory_bigmap.getMap(uid)['gender'][gender] = 1
+            self.labels_memory_bigmap.getMap(uid)['age'][age] = 1
+            self.labels_memory_bigmap.getMap(uid)['area'][area] = 1
         f.close()
 
         # init for node's memory
-        for uid in self.neighbors_list_dict:
+        for uid in self.neghbors_list_bigmap.getKeySet():
             if uid in self.train_uid_set:
                 continue
-            self.labels_memory_dict[uid] = {}
-            self.labels_memory_dict[uid]['gender'] = {}
-            self.labels_memory_dict[uid]['age'] = {}
-            self.labels_memory_dict[uid]['area'] = {}
-            # self.neighbors_list_dict[uid] = set([i for i in self.train_uid_set][0:5])  # for debug
+            self.labels_memory_bigmap.insert(uid, dict())
+            self.labels_memory_bigmap.getMap(uid)['gender'] = {}
+            self.labels_memory_bigmap.getMap(uid)['age'] = {}
+            self.labels_memory_bigmap.getMap(uid)['area'] = {}
+        #for uid in self.neghbors_list_bigmap.getKeySet(): #for debug
+            #self.neghbors_list_bigmap.insert(uid,set([i for i in self.train_uid_set][0:5]))   # for debug
 
-        print "self.labels_memory has length %d" % len(self.labels_memory_dict)
+        print "self.labels_memory has length %d" % self.labels_memory_bigmap.getLenght()
 
     # end of __init__
 
@@ -103,7 +102,7 @@ class Slpa:
             else:
                 neighborsListDict[uid1] = set()
                 neighborsListDict[uid1].add(uid2)
-        #     if len(neighborsListDict) == 1000: break  # for debug
+        # if len(neighborsListDict) == 1000: break  # for debug
         # for u in self.test_label_dict:  # for debug
         #     neighborsListDict[u] = set()
         input.close()
@@ -111,6 +110,28 @@ class Slpa:
 
     # end of get_neigbors
 
+    def get_neigbors_big_map(self, neighborsPairs2SideFile, mapNum):
+        """
+         if form is uid uid , you should transform into {"uid":["uid","uid",...]...}
+        :param neighborsPairs2SideFile:
+        :return: a dict like above
+        """
+        input = open(neighborsPairs2SideFile, 'r')
+        neighborsListBigMap = bigMap(mapNum)
+        for line in input:
+            uid1, uid2 = line.strip().split(' ')
+            if neighborsListBigMap.isExist(uid1):
+                neighborsListBigMap.getMap(uid1).add(uid2)
+            else:
+                neighborsListBigMap.insert(uid1, set())
+                neighborsListBigMap.getMap(uid1).add(uid2)
+            #if neighborsListBigMap.getLenght() == 1000: break  # for debug
+        #for u in self.test_label_dict:  # for debug
+            #neighborsListBigMap.insert(u,set())
+        input.close()
+        return neighborsListBigMap
+
+    # end of get_neigbors
 
     def perform_slpa(self, ITERATION, change=0.001):
         """Performs SLPA algorithm
@@ -125,20 +146,20 @@ class Slpa:
         last_rate_total = 0
         for t in range(self.ITERATION):
             print "Performing %dth iteration..." % t
-            order = np.random.permutation(self.labels_memory_dict.keys())  # Nodes.ShuffleOrder()
-            for uid in order:  # for each node
+            # order = np.random.permutation(self.labels_memory_dict.keys())  # Nodes.ShuffleOrder()
+            for uid in self.labels_memory_bigmap.getKeySet():  # for each node
                 if uid in self.train_uid_set: continue
-                neighbors = self.neighbors_list_dict[uid]
-                for label_type in self.labels_memory_dict[uid]:
+                neighbors = self.neghbors_list_bigmap.getMap(uid)
+                for label_type in self.labels_memory_bigmap.getMap(uid):
                     label_list = {}
                     for neighbor in neighbors:  # for each neighbors of the listener
                         # select a label to propagate from speaker neighbor to listener uid
-                        if neighbor not in self.labels_memory_dict: continue
-                        sum_label = sum(self.labels_memory_dict[neighbor][label_type].itervalues())
+                        if self.labels_memory_bigmap.isExist(neighbor) == False: continue
+                        sum_label = sum(self.labels_memory_bigmap.getMap(neighbor)[label_type].itervalues())
                         if sum_label == 0: continue
                         label_rate = [float(c) / sum_label for c in
-                                      self.labels_memory_dict[neighbor][label_type].values()]
-                        keys = self.labels_memory_dict[neighbor][label_type].keys()
+                                      self.labels_memory_bigmap.getMap(neighbor)[label_type].values()]
+                        keys = self.labels_memory_bigmap.getMap(neighbor)[label_type].keys()
                         # use Multinomial Distribution to get label
                         label = keys[np.random.multinomial(1, label_rate).argmax()]
                         if label not in label_list:
@@ -151,10 +172,10 @@ class Slpa:
                     # add the selected label to the memory
                     if uid in self.test_label_dict:
                         self.test_label_dict[uid][label_type] = 1
-                    if selected_label in self.labels_memory_dict[uid][label_type]:
-                        self.labels_memory_dict[uid][label_type][selected_label] += 1
+                    if selected_label in self.labels_memory_bigmap.getMap(uid)[label_type]:
+                        self.labels_memory_bigmap.getMap(uid)[label_type][selected_label] += 1
                     else:
-                        self.labels_memory_dict[uid][label_type][selected_label] = 1
+                        self.labels_memory_bigmap.getMap(uid)[label_type][selected_label] = 1
             sum_gender = sum_age = sum_area = 0
             for uid in self.test_label_dict:
                 if self.test_label_dict[uid]['gender'] != 0:
@@ -185,11 +206,11 @@ class Slpa:
         self.THRESHHOLD = THRESHHOLD
 
         for uid in self.test_label_dict:
-            if uid not in self.labels_memory_dict:
+            if self.labels_memory_bigmap.isExist(uid)==False:
                 print "can't predict " + uid
                 continue
-            for label_type in self.labels_memory_dict[uid]:
-                memory = self.labels_memory_dict[uid][label_type]
+            for label_type in self.labels_memory_bigmap.getMap(uid):
+                memory = self.labels_memory_bigmap.getMap(uid)[label_type]
                 sum_label = sum(memory.itervalues())
                 threshhold = sum_label * self.THRESHHOLD
                 for k, v in memory.items():
@@ -203,8 +224,52 @@ class Slpa:
                     # end of post_processing  # end of Slpa class
 
 
+class bigMap:
+    def __init__(self, mapNum):
+        """
+
+        Args:
+            mapNum: the number of the map
+        """
+        self.mapNum = mapNum
+        self.lenght = 0
+        self.mapsList = list()
+        for i in range(mapNum):
+            temp = dict()
+            self.mapsList.append(temp)
+
+        self.keySet = set()
+
+    # end of __init__
+
+
+    def insert(self, key, value):
+        bucket = int(key) % self.mapNum
+        self.mapsList[bucket][key] = value
+        self.keySet.add(key)
+
+    def getMap(self, key):
+        bucket = int(key) % self.mapNum
+        return self.mapsList[bucket][key]
+
+    def getLenght(self):
+        self.lenght = len(self.keySet)
+        return self.lenght
+
+    def isExist(self, key):
+        bucket = int(key) % self.mapNum
+        return key in self.mapsList[bucket]
+
+    def getKeySet(self):
+        return self.keySet
+
+
+# end of Bigmap class
+
 def main():
     start_time = time.time()
+    # slpa = Slpa("F:\\allDataProcess\\neighborPairs.txt", "F:\\allDataProcess\\label_maps.csv",
+    #             "F:\\allDataProcess\\smpData\\test\\test_nolabels.txt",1000)
     slpa = Slpa("../dataProcess/smpData/neighborPairs2Side.txt", "../dataProcess/smpData/label_maps.csv",
                 "../dataProcess/smpData/test/test_nolabels.txt")
     end_time = time.time()
