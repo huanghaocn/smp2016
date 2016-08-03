@@ -8,6 +8,50 @@
 @notes   :
 """
 
+import pandas as pd
+import os
+
+# 将年龄段映射为0|1|2
+def age2Flag(age):
+    age2Flag_dict = {
+        '-1979':0,
+        '1980-1989':1,
+        '1990+':2,
+        'None':2333
+    }
+    if age<1980:
+        return age2Flag_dict['-1979']
+    elif (age>=1980) & (age<1990):
+        return age2Flag_dict['1980-1989']
+    else:
+        return age2Flag_dict['1990+']
+
+# 将年龄段映射为0|1|2
+def flag2Age(flag):
+    flag2Age_dict = {
+        0:'-1979',
+        1:'1980-1989',
+        2:'1990+',
+    }
+    return flag2Age_dict[flag]
+
+# 将名别映射为0|1
+def gender2Flag(gender):
+    gender2Flag_dict = {
+        'f':0,
+        'm':1,
+        'None':2333
+    }
+    return gender2Flag_dict[gender]
+
+# 将0|1映射为名别
+def flag2Gender(flag):
+    flag2Gender_dict = {
+        0:'f',
+        1:'m',
+    }
+    return flag2Gender_dict[flag]
+
 # 将省份映射至地区编号
 def province2Num(province):
     province2Num_dict = {
@@ -44,29 +88,22 @@ def num2Area(num):
     }
     return num2Area_dict[num]
 
-# 将名别映射为0|1
-def gender2Flag(gender):
-    gender2Flag_dict = {
-        'f':0,
-        'm':1,
-        'None':2333
-    }
-    return gender2Flag_dict[gender]
 
-# 将年龄段映射为0|1|2
-def age2Flag(age):
-    age2Flag_dict = {
-        '-1979':0,
-        '1980-1989':1,
-        '1990+':2,
-        'None':2333
-    }
-    if age<1980:
-        return age2Flag_dict['-1979']
-    elif (age>=1980) & (age<1990):
-        return age2Flag_dict['1980-1989']
-    else:
-        return age2Flag_dict['1990+']
+def resultEncoding(resultName,outputName):
+    result_df = pd.read_csv(resultName,index_col=False,header=None,names=['uid','age','gender','province'])
+    age = []
+    gender = []
+    province = []
+    for row in range(len(result_df)):
+        age.append(flag2Age(int(result_df.loc[row,'age'])))
+        gender.append(gender2Flag(int(result_df.loc[row,'gender'])))
+        province.append(num2Area(int(result_df.loc[row,'province'])))
+    temp_df = pd.DataFrame(columns=['uid','age','gender','province'])
+    temp_df.uid = result_df.uid
+    temp_df.age = age
+    temp_df.gender = gender
+    temp_df.province = province
+    temp_df.to_csv(os.getcwd()+outputName,encoding='utf-8',index=False)
 
 if __name__ == '__main__':
     print num2Area(province2Num('陕西'))
