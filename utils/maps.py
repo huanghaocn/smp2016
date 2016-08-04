@@ -63,15 +63,15 @@ def province2Num(province):
         4:['广东','广西','海南','香港','澳门'],
         5:['云南','贵州','四川','西藏'],
         6:['新疆','陕西','宁夏','青海','甘肃'],
-        7:[]
+        7:['海外']
     }
 
-    num = 999
-    for subList in province2Num_dict.values():
-        if (province in subList) | (len(subList)==0):
-            num = province2Num_dict.keys()[province2Num_dict.values().index(subList)]
-            break
-    return num
+    num = 2333
+    for id in province2Num_dict:
+        if (province in province2Num_dict[id]):
+            return id
+        else:
+            return num
 
 # 将地区编号映射为地区中文
 def num2Area(num):
@@ -105,6 +105,7 @@ def resultEncoding(resultName,outputName):
     temp_df.province = province
     temp_df.to_csv(os.getcwd()+outputName,encoding='utf-8',index=False)
 
+
 if __name__ == '__main__':
     print num2Area(province2Num('陕西'))
-
+    # resultEncoding()
