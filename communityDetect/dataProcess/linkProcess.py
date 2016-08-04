@@ -132,7 +132,8 @@ def merge(files, outputFile):
     print "merge file done"
 
 
-def appendTrainAndTestLink(trainLabel, trainLinks, testLabel, testLinks, neighborPairs, unlabelLink, neighborPairs2Side):
+def appendTrainAndTestLink(trainLabel, trainLinks, testLabel, testLinks, neighborPairs, unlabelLink,
+                           neighborPairs2Side):
     output = open(neighborPairs2Side, 'a')
     uids = set()
     trainAppended = set()
@@ -243,7 +244,7 @@ if __name__ == "__main__":
     getNeighbors(home + "allLinks.txt", home + "neighborPairs.txt", home + "fansNum.txt",
                  home + "followNum.txt", home + "followAloneList.txt",
                  home + "followEachOtherNum.txt")
-    getNeigborsList("neighborPairs.txt", "neighborList.txt", )
+    # getNeigborsList(home + "neighborPairs.txt", home+"neighborList.txt")
     getNeigborsPairs(home + "neighborPairs.txt", home + "neighborPairs2Side.txt")
     appendTrainAndTestLink(home + "train/train_labels.txt", home + "train/train_links.txt",
                            home + "test/test_nolabels.txt",

@@ -84,32 +84,6 @@ class Slpa:
 
         print "self.labels_memory has length %d" % self.labels_memory_bigmap.getLenght()
 
-    # end of __init__
-
-
-    def get_neigbors(self, neighborsPairs2SideFile):
-        """
-         if form is uid uid , you should transform into {"uid":["uid","uid",...]...}
-        :param neighborsPairs2SideFile:
-        :return: a dict like above
-        """
-        input = open(neighborsPairs2SideFile, 'r')
-        neighborsListDict = {}
-        for line in input:
-            uid1, uid2 = line.strip().split(' ')
-            if uid1 in neighborsListDict:
-                neighborsListDict[uid1].add(uid2)
-            else:
-                neighborsListDict[uid1] = set()
-                neighborsListDict[uid1].add(uid2)
-        # if len(neighborsListDict) == 1000: break  # for debug
-        # for u in self.test_label_dict:  # for debug
-        #     neighborsListDict[u] = set()
-        input.close()
-        return neighborsListDict
-
-    # end of get_neigbors
-
     def get_neigbors_big_map(self, neighborsPairs2SideFile, mapNum):
         """
          if form is uid uid , you should transform into {"uid":["uid","uid",...]...}
@@ -118,13 +92,21 @@ class Slpa:
         """
         input = open(neighborsPairs2SideFile, 'r')
         neighborsListBigMap = bigMap(mapNum)
+        i = 0
         for line in input:
             uid1, uid2 = line.strip().split(' ')
             if neighborsListBigMap.isExist(uid1):
                 neighborsListBigMap.getMap(uid1).add(uid2)
+                if len(neighborsListBigMap.getMap(uid1))>100000:
+                    print 'so big'+uid1+' '+ str(len(neighborsListBigMap.getMap(uid1)))
             else:
                 neighborsListBigMap.insert(uid1, set())
                 neighborsListBigMap.getMap(uid1).add(uid2)
+                i = i + 1
+                if (i % 100000) ==0:
+                    print i
+                    print  str(neighborsListBigMap.getLenght())
+                    neighborsListBigMap.checkBalance()
             #if neighborsListBigMap.getLenght() == 1000: break  # for debug
         #for u in self.test_label_dict:  # for debug
             #neighborsListBigMap.insert(u,set())
@@ -233,6 +215,7 @@ class bigMap:
         """
         self.mapNum = mapNum
         self.lenght = 0
+        self.balance = {}
         self.mapsList = list()
         for i in range(mapNum):
             temp = dict()
@@ -241,10 +224,17 @@ class bigMap:
         self.keySet = set()
 
     # end of __init__
-
-
+    def checkBalance(self):
+        mapNum = self.balance.itervalues()
+        temp = sorted(mapNum,reverse=True)
+        print 'used map num:'+str(len(temp))
+        print 'top dict num:'+str(temp[0:10])
     def insert(self, key, value):
         bucket = int(key) % self.mapNum
+        if bucket in self.balance:
+            self.balance[bucket] = self.balance[bucket]+1
+        else:
+            self.balance[bucket] = 1
         self.mapsList[bucket][key] = value
         self.keySet.add(key)
 
@@ -268,10 +258,10 @@ class bigMap:
 
 def main():
     start_time = time.time()
-    # slpa = Slpa("F:\\allDataProcess\\neighborPairs.txt", "F:\\allDataProcess\\label_maps.csv",
-    #             "F:\\allDataProcess\\smpData\\test\\test_nolabels.txt",1000)
-    slpa = Slpa("../dataProcess/smpData/neighborPairs2Side.txt", "../dataProcess/smpData/label_maps.csv",
-                "../dataProcess/smpData/test/test_nolabels.txt")
+    slpa = Slpa("F:\\allDataProcess\\neighborPairs.txt", "F:\\allDataProcess\\label_maps.csv",
+                "F:\\allDataProcess\\smpData\\test\\test_nolabels.txt",800)
+    # slpa = Slpa("../dataProcess/smpData/neighborPairs2Side.txt", "../dataProcess/smpData/label_maps.csv",
+    #             "../dataProcess/smpData/test/test_nolabels.txt",800)
     end_time = time.time()
     print("Elapsed time for initialization was %g seconds" % (end_time - start_time))
 
@@ -302,4 +292,9 @@ def main():
 # end of main().
 
 if __name__ == "__main__":
+    # test = {}
+    # for i in range(4000000):
+    #     test[str(i*1000)]=set()
+    #     if i%100000==0:print i
+
     main()
