@@ -68,10 +68,10 @@ def province2Num(province):
 
     num = 2333
     for id in province2Num_dict:
-        if (province in province2Num_dict[id]):
-            return id
-        else:
-            return num
+        if province in province2Num_dict[id]:
+            num = id
+
+    return num
 
 # 将地区编号映射为地区中文
 def num2Area(num):
@@ -109,3 +109,4 @@ def resultEncoding(resultName,outputName):
 if __name__ == '__main__':
     print num2Area(province2Num('陕西'))
     # resultEncoding()
+    print province2Num('陕西')
