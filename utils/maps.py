@@ -90,20 +90,20 @@ def num2Area(num):
 
 
 def resultEncoding(resultName,outputName):
-    result_df = pd.read_csv(resultName,index_col=False,header=None,names=['uid','age','gender','province'])
+    result_df = pd.read_csv(resultName)
     age = []
     gender = []
     province = []
     for row in range(len(result_df)):
         age.append(flag2Age(int(result_df.loc[row,'age'])))
-        gender.append(gender2Flag(int(result_df.loc[row,'gender'])))
+        gender.append(flag2Gender(int(result_df.loc[row,'gender'])))
         province.append(num2Area(int(result_df.loc[row,'province'])))
     temp_df = pd.DataFrame(columns=['uid','age','gender','province'])
     temp_df.uid = result_df.uid
     temp_df.age = age
     temp_df.gender = gender
     temp_df.province = province
-    temp_df.to_csv(os.getcwd()+outputName,encoding='utf-8',index=False)
+    temp_df.to_csv(os.getcwd()+"/"+outputName,encoding='utf-8',index=False)
 
 
 if __name__ == '__main__':

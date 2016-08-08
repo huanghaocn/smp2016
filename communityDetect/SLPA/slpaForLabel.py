@@ -6,6 +6,9 @@
 import numpy as np
 import time
 import os
+import sys
+sys.path.append("../..")
+from utils.maps import *
 
 
 class Slpa:
@@ -113,8 +116,8 @@ class Slpa:
             start_time = time.time()
             print "Performing %dth iteration..." % t
             processUserNum = 0
-            # order = np.random.permutation(self.labels_memory_dict.keys())  # Nodes.ShuffleOrder()
-            for uid in self.labels_memory_bigmap.getKeySet():  # for each node
+            order = np.random.permutation(list(self.labels_memory_bigmap.getKeySet()))  # Nodes.ShuffleOrder()
+            for uid in order:  # for each node
                 if uid in self.train_uid_set: continue
                 neighbors = self.neghbors_list_bigmap.getMap(uid)
                 for label_type in self.labels_memory_bigmap.getMap(uid):
@@ -158,7 +161,7 @@ class Slpa:
             rate = [float(sum_gender) / test_len, float(sum_age) / test_len, float(sum_area) / test_len]
             print "test set cover gender %f age %f area %f " % (rate[0], rate[1], rate[2])
             rate_total = float(sum(rate)) / 3
-            if (rate_total - last_rate_total < change) and (rate_total > 0.85):
+            if (rate_total - last_rate_total < change) and (rate_total > 0.5):
                 break
             last_rate_total = rate_total
             self.writeResult(t)
@@ -242,7 +245,7 @@ class Slpa:
                     temp_test_label_dict[uid][label_type][k] = float(v) / sum_label
         print "can't predict user size " + str(i)
         rate_out = open("rateTemp" + str(iteration) + ".csv", "w+")
-        result_out = open("temp" + str(iteration) + ".csv", "w+")
+        result_out = open("result" + str(iteration) + ".csv", "w+")
         rate_out.write("uid,age,gender,province\n")
         result_out.write("uid,age,gender,province\n")
         for uid in self.resultOrder:
@@ -264,6 +267,7 @@ class Slpa:
                 selected_area_label = 1
             rate_out.write("%s %s %s %s\n" % (uid, label[1], label[2], label[3]))
             result_out.write("%s,%s,%s,%s\n" % (uid, selected_age_label, selected_gender_label, selected_area_label))
+        resultEncoding("result" + str(iteration) + ".csv","temp" + str(iteration) + ".csv")
         result_out.close()
         rate_out.close()
 
@@ -325,6 +329,7 @@ class bigMap:
 # end of Bigmap class
 
 def main():
+    # resultEncoding("/home/qibai/temp38.csv","result.csv")
     start_time = time.time()
     #windows
     # slpa = Slpa("F:\\allDataProcess\\neighborPairs.txt", "F:\\allDataProcess\\label_maps.csv",

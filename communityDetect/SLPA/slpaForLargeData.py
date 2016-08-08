@@ -7,6 +7,7 @@ import numpy as np
 import time
 import os
 
+
 class Slpa:
     """Identify overlapping nodes and overlapping communities in social networks
 
@@ -41,6 +42,27 @@ class Slpa:
                 message = "Sorry, I cannot find the '%s' file."
             print message % filename
 
+
+
+        # f = open("/home/qibai/Documents/smpData/test/test_nolabels.txt", "r")
+        # self.test_label_dict = {}
+        # for line in f:
+        #     uid = line.strip()
+        #     uid = int(uid)
+        #     self.test_label_dict[uid] = {}
+        # f.close()
+        # f = open("/home/qibai/Documents/PycharmProjects/smp2016/data-normalized/label_maps.csv", "r")
+        #
+        # self.train_uid_set = set()
+        # for line in f:
+        #     if header_line:
+        #         header_line = False
+        #         continue
+        #     user_profile = line.strip().split(',')
+        #     uid = user_profile[0]
+        #     self.train_uid_set.add(int(uid))
+        # f.close()
+
         self.neghbors_list_bigmap = self.get_neigbors_big_map(input_file, mapNum)
         self.N = self.neghbors_list_bigmap.getLenght()
         print "self.neighbors_bigmap has length %d" % self.N
@@ -50,7 +72,7 @@ class Slpa:
         for uid in self.neghbors_list_bigmap.getKeySet():
             self.labels_memory_bigmap.insert(uid, dict())
             self.labels_memory_bigmap.getMap(uid)[uid] = 1
-            # for uid in self.neghbors_list_bigmap.getKeySet():  # for debug
+        # for uid in self.neghbors_list_bigmap.getKeySet():  # for debug
         #     self.neghbors_list_bigmap.insert(uid, set([i for i in self.train_uid_set][0:5]))  # for debug
 
         print "self.labels_memory has length %d" % self.labels_memory_bigmap.getLenght()
@@ -72,13 +94,13 @@ class Slpa:
             start_time = time.time()
             print "Performing %dth iteration..." % t
             processUserNum = 0
-            order = np.random.permutation(self.labels_memory_bigmap.getKeySet())  # Nodes.ShuffleOrder()
+            order = np.random.permutation(list(self.labels_memory_bigmap.getKeySet()))  # Nodes.ShuffleOrder()
             for uid in order:  # for each node
-                if uid in self.train_uid_set: continue
                 neighbors = self.neghbors_list_bigmap.getMap(uid)
                 label_list = {}
                 for neighbor in neighbors:  # for each neighbors of the listener
                     # select a label to propagate from speaker neighbor to listener uid
+                    if self.labels_memory_bigmap.isExist(neighbor) == False: continue
                     sum_label = sum(self.labels_memory_bigmap.getMap(neighbor).itervalues())
                     if sum_label == 0: continue
                     label_rate = [float(c) / sum_label for c in
@@ -124,7 +146,7 @@ class Slpa:
             for k, v in memory.items():
                 if v < threshhold:
                     del memory[k]  # remove the outliers
-        # end of the post_processing
+                    # end of the post_processing
 
     def get_neigbors_big_map(self, neighborsPairs2SideFile, mapNum):
         """
@@ -149,11 +171,12 @@ class Slpa:
                     print i
                     print  str(neighborsListBigMap.getLenght())
                     neighborsListBigMap.checkBalance()
-        # if neighborsListBigMap.getLenght() == 1000: break  # for debug
+        #     if neighborsListBigMap.getLenght() == 1000: break  # for debug
         # for u in self.test_label_dict.keys()[0:550]:  # for debug
         #     neighborsListBigMap.insert(u, set())
         input.close()
         return neighborsListBigMap
+
 
 # end of get_neigbors
 
@@ -221,12 +244,12 @@ def main():
     #             "/home/qibai/Documents/smpData/test/test_nolabels.txt", 200)
 
     # server
-    slpa = Slpa("/home/zhibin/junxu/smpData/neighborPairs2Side.txt", 200)
+    slpa = Slpa("/home/zhibin/junxu/smpData/neighborPairs2Side.txt", 20)
     end_time = time.time()
     print("Elapsed time for initialization was %g seconds" % (end_time - start_time))
 
     start_time = time.time()
-    slpa.perform_slpa(200)  # perform slpa for 200 iterations
+    slpa.perform_slpa(50)  # perform slpa for 200 iterations
     end_time = time.time()
     print("Elapsed time for slpa was %g seconds" % (end_time - start_time))
 
@@ -235,15 +258,52 @@ def main():
     end_time = time.time()
     print("Elapsed time for post processing was %g seconds" % (end_time - start_time))
 
-    label_out = open("allLabelResult.txt", "w+")
-    label_out.write("uid,age,gender,province\n")
+    f = open("/home/zhibin/junxu/smp2016/data-normalized/label_maps.csv", "r")
+    trainLabel = open("trainLabelResult.txt", "w+")
+    trainLabel.write("trainUid,communityId\n")
+    train_label_dict = dict()
+    train_community_dict = {}
+    for line in f:
+
+        item = line.strip().split(",")
+        try:
+            uid = int(item[0])
+        except:
+            continue
+        train_label_dict[uid] = ','.join(item[:])
+        if slpa.labels_memory_bigmap.isExist(uid):
+            train_community_dict[uid] = slpa.labels_memory_bigmap.getMap(uid)
+            trainLabel.write(str(uid) + " " + str(train_community_dict[uid])+'\n')
+    f.close()
+    trainLabel.close()
+
+
+    f = open("/home/zhibin/junxu/smpData/test/test_nolabels.txt", "r")
+    test_label_dict = set()
+    testLabel = open("testLabelResult.txt", "w+")
+    testLabel.write("testUid,communityId\n")
+    find = open("find.txt","w")
+    find.write('testUid,testCommunityId,trainLabel,trainCommunityId,togetherCommunityId\n')
+    for line in f:
+        uid = line.strip()
+        uid = int(uid)
+        test_label_dict.add(uid)
+        if slpa.labels_memory_bigmap.isExist(uid):
+            testLabel.write(str(uid) + ' ' + str(slpa.labels_memory_bigmap.getMap(uid))+'\n')
+            test_keys = set(slpa.labels_memory_bigmap.getMap(uid).keys())
+            for train_id in train_community_dict.keys():
+                train_keys = set(train_community_dict[train_id].keys())
+                if len(train_keys & test_keys) != 0:
+                    find.write(str(uid)+" "+str(slpa.labels_memory_bigmap.getMap(uid))+" "+train_label_dict[train_id]+" "+str(slpa.labels_memory_bigmap.getMap(train_id))+str(train_keys & test_keys)+'\n')
+    f.close()
+    testLabel.close()
+    find.close()
+    allLabel = open("allLabelResult.txt", "w+")
     for uid in slpa.labels_memory_bigmap.getKeySet():
         label = slpa.labels_memory_bigmap.getMap(uid)
-        label_out.write("%s %s %s %s\n" % (uid, label[1], label[2], label[3]))
-    label_out.close()
+        allLabel.write("%s %s\n" % (uid, label))
+    allLabel.close()  # end of main().
 
-
-# end of main().
 
 if __name__ == "__main__":
     main()
