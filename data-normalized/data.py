@@ -14,21 +14,22 @@ import sys
 sys.path.append("..")
 from utils.maps import *
 
-'''
+
 train_info_txt = '/home/shield/Competitions/smp-userProfile/train/train_info.txt'
 train_nolabel_txt = '/home/shield/Competitions/smp-userProfile/train/train_labels.txt'
 train_status_txt = '/home/shield/Competitions/smp-userProfile/train/train_status.txt'
 test_info_txt = '/home/shield/Competitions/smp-userProfile/test/test_info.txt'
 test_nolabel_txt = '/home/shield/Competitions/smp-userProfile/test/test_nolabels.txt'
 test_status_txt = '/home/shield/Competitions/smp-userProfile/test/test_status.txt'
-'''
 
+'''
 train_info_txt = '../data/train_info.txt'
 train_nolabel_txt = '../data/train_labels.txt'
 train_status_txt = '../data/train_status.txt'
 test_info_txt = '../data/test_info.txt'
 test_nolabel_txt = '../data/test_nolabels.txt'
 test_status_txt = '../data/test_status.txt'
+'''
 
 # 统计trainingSe、testingSet的 性别分布 | age分布 | area分布
 def naiveStatistic():
@@ -90,12 +91,12 @@ def train_labelMap():
     train_labelMap_table = pd.DataFrame(columns=['uid','gender','age','area'])
     for i in range(len(train_label_table)):
         row_list = [
-            train_label_table.loc[i,'uid'],
-            gender2Flag(train_label_table.loc[i,'gender']),
-            age2Flag(train_label_table.loc[i,'age']),
-            province2Num(train_label_table.loc[i,'prov'])
+            int(train_label_table.loc[i,'uid']),
+            int(gender2Flag(train_label_table.loc[i,'gender'])),
+            int(age2Flag(train_label_table.loc[i,'age'])),
+            int(province2Num(train_label_table.loc[i,'prov']))
         ]
-        train_labelMap_table.loc[i] = row_list
+        train_labelMap_table.loc[i] = map(str,row_list)
     print train_labelMap_table
     train_labelMap_table.to_csv('./label_maps.csv',index=False,encoding='utf-8')
 
@@ -126,3 +127,4 @@ def train_labelMap():
 
 if __name__ == '__main__':
     train_labelMap()
+    # resultEncoding('yes')
