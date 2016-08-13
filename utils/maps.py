@@ -57,21 +57,22 @@ def province2Num(province):
     province2Num_dict = {
         2333:['None'],
         0:['辽宁','吉林','黑龙江'],
-        1:['河北','山西','内蒙古','北京','天津'],
+        1:['河北','山西','内蒙古','北京','天津','内蒙古自治区'],
         2:['山东','江苏','安徽','浙江','台湾','福建','江西','上海'],
         3:['河南','湖北','湖南'],
-        4:['广东','广西','海南','香港','澳门'],
-        5:['云南','贵州','四川','西藏'],
-        6:['新疆','陕西','宁夏','青海','甘肃'],
+        4:['广东','广西','海南','香港','澳门','广西壮族自治区'],
+        5:['云南','贵州','四川','重庆','西藏','西藏自治区'],
+        6:['新疆','陕西','宁夏','青海','甘肃','宁夏回族自治区','新疆维吾尔自治区'],
         7:['海外']
     }
 
     num = 2333
     for id in province2Num_dict:
         if (province in province2Num_dict[id]):
-            return id
-        else:
-            return num
+            num = id
+            break
+
+    return num
 
 # 将地区编号映射为地区中文
 def num2Area(num):
@@ -107,5 +108,5 @@ def resultEncoding(resultName,outputName):
 
 
 if __name__ == '__main__':
-    print num2Area(province2Num('陕西'))
+    print num2Area(province2Num('None'))
     # resultEncoding()
