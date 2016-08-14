@@ -16,7 +16,7 @@ from utils.maps import *
 
 '''
 train_info_txt = '/home/shield/Competitions/smp-userProfile/train/train_info.txt'
-train_nolabel_txt = '/home/shield/Competitions/smp-userProfile/train/train_labels.txt'
+train_label_txt = '/home/shield/Competitions/smp-userProfile/train/train_labels.txt'
 train_status_txt = '/home/shield/Competitions/smp-userProfile/train/train_status.txt'
 test_info_txt = '/home/shield/Competitions/smp-userProfile/test/test_info.txt'
 test_nolabel_txt = '/home/shield/Competitions/smp-userProfile/test/test_nolabels.txt'
@@ -24,7 +24,7 @@ test_status_txt = '/home/shield/Competitions/smp-userProfile/test/test_status.tx
 '''
 
 train_info_txt = '../data/train_info.txt'
-train_nolabel_txt = '../data/train_labels.txt'
+train_label_txt = '/home/zeus/0or1/local-smp2016/data/train_labels.txt'
 train_status_txt = '../data/train_status.txt'
 test_info_txt = '../data/test_info.txt'
 test_nolabel_txt = '../data/test_nolabels.txt'
@@ -35,7 +35,7 @@ def naiveStatistic():
     print '=== train ==='
 
     train_info_table = pd.read_table(train_info_txt,sep='\|\|',index_col=False,header=None,names=['uid','alias','url'],engine='python')
-    train_label_table = pd.read_table(train_nolabel_txt,sep='\|\|',index_col=False,header=None,names=['uid','gender','age','area'],engine='python')
+    train_label_table = pd.read_table(train_label_txt,sep='\|\|',index_col=False,header=None,names=['uid','gender','age','area'],engine='python')
     train_status_table = pd.read_table(train_status_txt,sep=',',index_col=False,header=None,names=['uid','n_retweet','n_review','source','time','content'])
 
     print 'n_train_info:',len(set(train_info_table.uid.values.tolist()))
@@ -72,7 +72,7 @@ def naiveStatistic():
 # label编码
 def train_labelMap():
     print '=== train ==='
-    train_label_table = pd.read_table(train_nolabel_txt,sep='\|\|',index_col=False,header=None,names=['uid','gender','age','area'],engine='python')
+    train_label_table = pd.read_table(train_label_txt,sep='\|\|',index_col=False,header=None,names=['uid','gender','age','area'],engine='python')
 
     # print train_label_table
     n_female = len(train_label_table[train_label_table.gender=='f'])
@@ -95,13 +95,13 @@ def train_labelMap():
             age2Flag(train_label_table.loc[i,'age']),
             province2Num(train_label_table.loc[i,'prov'])
         ]
-        train_labelMap_table.loc[i] = row_list
+        train_labelMap_table.loc[i] = map(str,row_list)
     print train_labelMap_table
     train_labelMap_table.to_csv('./label_maps.csv',index=False,encoding='utf-8')
 
     # 取出none值
-    while 'None' in prov_list:
-        prov_list.remove('None')
+    # while 'None' in prov_list:
+    #     prov_list.remove('None')
     prov_map_list = []
     # 对省份进行地区映射
     for prov in prov_list:
@@ -113,9 +113,9 @@ def train_labelMap():
             dicts[i] = 1
         else:
             dicts[i] += 1
-    stat_area = '东北,{0}\n华北,{1}\n华东,{2}\n华中,{3}\n华南,{4}\n西南,{5}\n西北,{6}\n境外,{7}' \
+    stat_area = '东北,{0}\n华北,{1}\n华东,{2}\n华中,{3}\n华南,{4}\n西南,{5}\n西北,{6}\n境外,{7}\nNone,{8}' \
         .format(dicts.values()[0],dicts.values()[1],dicts.values()[2],dicts.values()[3],
-        dicts.values()[4],dicts.values()[5],dicts.values()[6],dicts.values()[7])
+        dicts.values()[4],dicts.values()[5],dicts.values()[6],dicts.values()[7],dicts.values()[8])
 
     with open('./train_stat.csv','w') as f:
         f.writelines('statItem,num\n')
