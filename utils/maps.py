@@ -57,19 +57,20 @@ def province2Num(province):
     province2Num_dict = {
         2333:['None'],
         0:['辽宁','吉林','黑龙江'],
-        1:['河北','山西','内蒙古','北京','天津'],
+        1:['河北','山西','内蒙古','北京','天津','内蒙古自治区'],
         2:['山东','江苏','安徽','浙江','台湾','福建','江西','上海'],
         3:['河南','湖北','湖南'],
-        4:['广东','广西','海南','香港','澳门'],
-        5:['云南','贵州','重庆','四川','西藏'],
-        6:['新疆','陕西','宁夏','青海','甘肃'],
+        4:['广东','广西','海南','香港','澳门','广西壮族自治区'],
+        5:['云南','贵州','四川','重庆','西藏','西藏自治区'],
+        6:['新疆','陕西','宁夏','青海','甘肃','宁夏回族自治区','新疆维吾尔自治区'],
         7:['海外']
     }
 
     num = 2333
     for id in province2Num_dict:
-        if province in province2Num_dict[id]:
+        if (province in province2Num_dict[id]):
             num = id
+            break
 
     return num
 
@@ -90,23 +91,22 @@ def num2Area(num):
 
 
 def resultEncoding(resultName,outputName):
-    result_df = pd.read_csv(resultName)
+    result_df = pd.read_csv(resultName,index_col=False,header=None,names=['uid','age','gender','province'])
     age = []
     gender = []
     province = []
     for row in range(len(result_df)):
         age.append(flag2Age(int(result_df.loc[row,'age'])))
-        gender.append(flag2Gender(int(result_df.loc[row,'gender'])))
+        gender.append(gender2Flag(int(result_df.loc[row,'gender'])))
         province.append(num2Area(int(result_df.loc[row,'province'])))
     temp_df = pd.DataFrame(columns=['uid','age','gender','province'])
     temp_df.uid = result_df.uid
     temp_df.age = age
     temp_df.gender = gender
     temp_df.province = province
-    temp_df.to_csv(os.getcwd()+"/"+outputName,encoding='utf-8',index=False)
+    temp_df.to_csv(os.getcwd()+outputName,encoding='utf-8',index=False)
 
 
 if __name__ == '__main__':
-    print num2Area(province2Num('陕西'))
+    print num2Area(province2Num('None'))
     # resultEncoding()
-    print province2Num('陕西')

@@ -8,7 +8,7 @@
 @notes   :
     1. test file
 """
-
+import pandas as pd
 
 def province2Num(province):
     province2Num_dict = {
@@ -43,6 +43,12 @@ def num2Area(num):
     }
     return num2Area_dict[num]
 
+def mytest():
+    df = pd.DataFrame({'a':[1,2,3],'b':[4,5,6]})
+    # df = df.replace('None',-999).copy()
+    df['C'] = [1,2,8]
+    print df
+
 
 if __name__ == '__main__':
     # print num2Area(province2Num('陕西'))
@@ -54,3 +60,15 @@ if __name__ == '__main__':
         else:
             dicts[i] += 1
     print dicts.keys(),dicts.values()
+
+    mytest()
+
+    items = dict([('a',1),('b',2)])
+    print items.keys()
+    a = [1,2,3,3,4,4]
+    print max(a)
+    b = []
+
+    df = pd.DataFrame({'a':[1,2,3],'b':[4,5,6]})
+    print (df['b']-1)
+    print df-1
