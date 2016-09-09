@@ -114,7 +114,7 @@ def resultEncoding(resultName, outputName):
 
 
 def province2area(province):
-    north_east = [u'辽宁', u'吉林', u'黑龙江'],
+    north_east = [u'辽宁', u'吉林', u'黑龙江']
     north = [u'河北', u'山西', u'内蒙古', u'北京', u'天津']
     east = [u'山东', u'江苏', u'安徽', u'浙江', u'台湾', u'福建', u'江西', u'上海']
     center = [u'河南', u'湖北', u'湖南']
