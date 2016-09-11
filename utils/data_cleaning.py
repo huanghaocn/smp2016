@@ -3,6 +3,7 @@
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 
+
 def getCosine(a, b):
     ab_sum = np.dot(a, b)
     a_sum_square = np.dot(a, a.T)
@@ -38,7 +39,7 @@ with open("/home/qibai/Documents/PycharmProjects/smp2016/data/train/train_status
                     similarity = getCosine(np.array(count_vector_tweet_i), np.array(count_vector_tweew_j))
                     if similarity >= up_similarity:
                         break
-                if similarity < up_similarity :
+                if similarity < up_similarity:
                     data_cleaned_train_status.write(weiboText[i] + '\n')
             data_cleaned_train_status.write(weiboText[len(count_vector_tweews) - 1] + '\n')
         uid = line.split(",")[0]
