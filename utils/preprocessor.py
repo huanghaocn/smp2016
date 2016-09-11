@@ -3,8 +3,8 @@ import re
 
 
 def weibo_process(content):
-    content = re.sub(r'http://t\.cn/\w+\s|\d+|_|￥\s.*\s￥', '', content)
-    content = re.sub(r'[\s\u4e00-\u9fa5]', '', content)
+    content = re.sub(r'http://t\.cn/\w+\s|\d+|_|￥\s.*\s￥|\s', '', content)
+    # content = re.sub(r'\s', '', content)
     return content
 
 
