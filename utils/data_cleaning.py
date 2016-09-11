@@ -15,7 +15,15 @@ def getCosine(a, b):
 
 
 def duplicateDetection(origin="../data/train/train_status.txt",
-                       output="../data/train/cleaned_train_status.txt"):
+                       output="../data/train/cleaned_train_status.txt",
+                       up_similarity=0.9):
+    """
+
+    :param origin: origin file for duplicate detection
+    :param output: the file path for save remove duplicate tweets
+    :param up_similarity: the param to control
+    :return:
+    """
     with codecs.open(origin) as trainLines, \
             open(output, 'w') as data_cleaned_train_status:
         vectorizer = CountVectorizer()
@@ -23,7 +31,6 @@ def duplicateDetection(origin="../data/train/train_status.txt",
         count_vector_tweets = []
         text = []
         uid = ""
-        up_similarity = 0.98
         num = 0
         for line in trainLines:
             if uid == line.split(",")[0]:
@@ -42,8 +49,8 @@ def duplicateDetection(origin="../data/train/train_status.txt",
                         count_vector_tweet_j = count_vector_tweets[j]
                         similarity = getCosine(np.array(count_vector_tweet_i), np.array(count_vector_tweet_j))
                         if similarity >= up_similarity:
-                            # num += 1
-                            # print num
+                            num += 1
+                            print "delete %s rows", num
                             break
                     if similarity < up_similarity:
                         data_cleaned_train_status.write((weiboText[i] + '\n'))
@@ -57,4 +64,6 @@ def duplicateDetection(origin="../data/train/train_status.txt",
 
 
 if __name__ == '__main__':
-    duplicateDetection()
+    duplicateDetection(origin="../data/train/train_status.txt",
+                       output="../data/train/cleaned_train_status.txt",
+                       up_similarity=0.9)
