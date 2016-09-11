@@ -14,7 +14,7 @@ import json
 
 
 def predict_birthday(x_train, y_train, x_test):
-    vectorizer = CountVectorizer()
+    vectorizer = TfidfVectorizer(max_df=0.1)
     train_vector = vectorizer.fit_transform(x_train)
     test_vector = vectorizer.transform(x_test)
     tuned_params = [{'alpha': [0.001, 0.1, 1, 10]}]
@@ -27,7 +27,7 @@ def predict_birthday(x_train, y_train, x_test):
 
 
 def predict_gender(x_train, y_train, x_test):
-    vectorizer = CountVectorizer()
+    vectorizer = TfidfVectorizer(max_features=1000)
     train_vector = vectorizer.fit_transform(x_train)
     test_vector = vectorizer.transform(x_test)
     tuned_params = [{'alpha': [0.001, 0.1, 1, 10]}]
@@ -74,29 +74,33 @@ if __name__ == '__main__':
         for line in labels:
             infos = line.strip().split('||')
             uid = infos[0]
-            if not maps.province2area(infos[3].split(' ')[0].decode('utf-8')) == u'境外':
-                users[uid] = {'content': ''}
-                users[uid]['gender'] = infos[1]
-                users[uid]['birthday'] = maps.age2seg(int(infos[2]))
-                users[uid]['location'] = maps.province2area(infos[3].split(' ')[0].decode('utf-8'))
-                # if users[uid]['location'] != u'境外':
-                #     users[uid]['location'] = u'境内'
+            # if not maps.province2area(infos[3].split(' ')[0].decode('utf-8')) == u'境外':
+            users[uid] = {'content': '', 'location_content': ''}
+            users[uid]['gender'] = infos[1]
+            users[uid]['birthday'] = maps.age2seg(int(infos[2]))
+            users[uid]['location'] = maps.province2area(infos[3].split(' ')[0].decode('utf-8'))
+            # if users[uid]['location'] != u'境外':
+            #     users[uid]['location'] = u'境内'
         for line in status:
             weibo = [t for t in line.strip().split(',')]
             uid = weibo[0]
             if uid in users:
-                users[uid]['content'] += preprocessor.weibo_process(weibo[5])
+                if users[uid]['location'] != u'境外':
+                    users[uid]['location_content'] += preprocessor.weibo_process(weibo[5], True)
+                users[uid]['content'] += preprocessor.weibo_process(weibo[5], False)
         # 读入测试集
         test_users = {}
         test_uid = []
         for line in test_no_labels:
-            test_users[line.strip()] = {'content': ''}
+            test_users[line.strip()] = {'content': '', 'location_content': ''}
             test_uid.append(line.strip())
         for line in test_status:
             weibo = [t for t in line.strip().split(',')]
             uid = weibo[0]
             if uid in test_users:
-                test_users[uid]['content'] += preprocessor.weibo_process(weibo[5])
+                test_users[uid]['content'] += preprocessor.weibo_process(weibo[5], False)
+                test_users[uid]['location_content'] += preprocessor.weibo_process(weibo[5], True)
+
         # 从info里获取性别
         gender_from_info = {}
         for line in test_info:
@@ -110,19 +114,22 @@ if __name__ == '__main__':
 
         print 'data loaded'
 
-        content, gender, birthday, location = [], [], [], []
+        location_content, content, gender, birthday, location = [], [], [], [], []
         for uid in users:
+            if users[uid]['location_content']:
+                location_content.append(users[uid]['location_content'])
+                location.append(users[uid]['location'])
             content.append(users[uid]['content'])
             gender.append(users[uid]['gender'])
             birthday.append(users[uid]['birthday'])
-            location.append(users[uid]['location'])
-        test_content = []
+        test_content, location_test_content = [], []
         for uid in test_uid:
             test_content.append(test_users[uid]['content'])
+            location_test_content.append(test_users[uid]['location_content'])
 
         gender_predict = predict_gender(content, gender, test_content)
         birthday_predict = predict_birthday(content, birthday, test_content)
-        location_predict = predict_location(content, location, test_content)
+        location_predict = predict_location(location_content, location, location_test_content)
         # location_prob = clf3.predict_proba(location_test)
         # location_prob = np.max(location_prob, axis=1)
         for i, uid in enumerate(test_uid):
@@ -132,6 +139,7 @@ if __name__ == '__main__':
                 gender = gender_predict[i]
             print '%s,%s,%s,%s' % (
                 uid, birthday_predict[i], gender, location_predict[i])
+                # uid, birthday_predict[i], gender, 'huibei')
             #     print location_prob[i]
             # print json.dumps([location.get_feature_names()[j] for j in birthday_test[i].indices],
             #                  ensure_ascii=False)

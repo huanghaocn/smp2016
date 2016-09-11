@@ -2,9 +2,10 @@
 import re
 
 
-def weibo_process(content):
-    content = re.sub(r'http://t\.cn/\w+\s|\d+|_|￥\s.*\s￥|\s', '', content)
-    # content = re.sub(r'\s', '', content)
+def weibo_process(content,no_space):
+    content = re.sub(r'http://t\.cn/\w+\s|\d+|_|￥\s.*\s￥', '', content)
+    if no_space:
+        content = re.sub(r'\s', '', content)
     return content
 
 
