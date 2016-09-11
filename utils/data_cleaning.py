@@ -2,10 +2,11 @@
 
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
+import codecs
 
 
 def getCosine(a, b):
-    ab_sum = np.dot(a, b)
+    ab_sum = np.dot(a, b.T)
     a_sum_square = np.dot(a, a.T)
     b_sum_square = np.dot(b, b.T)
     if a_sum_square == 0 or b_sum_square == 0:
@@ -13,37 +14,47 @@ def getCosine(a, b):
     return float(ab_sum) / (np.sqrt(a_sum_square) * np.sqrt(b_sum_square))
 
 
-with open("/home/qibai/Documents/PycharmProjects/smp2016/data/train/train_status.txt") as trainLines:
-    data_cleaned_train_status = open("/home/qibai/Documents/smpData/train/cleaned_train_status.txt", 'w')
-    vectorizer = CountVectorizer()
-    weiboText = []
-    count_vector_tweews = []
-    text = ""
-    uid = ""
-    up_similarity = 0.9
-    for line in trainLines:
-        if uid == line.split(",")[0]:
-            text += line.strip().split(",")[5] + " "
-            weiboText.append(line.strip())
-            continue
-        if text != "":
-            vectorizer.fit(text)
-        for tweet in weiboText:
-            count_vector_tweet = vectorizer.transform(tweet.split(",")[5])
-            count_vector_tweews.append(count_vector_tweet.toarray())
-        if len(count_vector_tweews) != 0:
-            for i in range(len(count_vector_tweews) - 1):
-                count_vector_tweet_i = count_vector_tweews[i]
-                for j in range(i + 1, len(count_vector_tweews)):
-                    count_vector_tweew_j = count_vector_tweews[j]
-                    similarity = getCosine(np.array(count_vector_tweet_i), np.array(count_vector_tweew_j))
-                    if similarity >= up_similarity:
-                        break
-                if similarity < up_similarity:
-                    data_cleaned_train_status.write(weiboText[i] + '\n')
-            data_cleaned_train_status.write(weiboText[len(count_vector_tweews) - 1] + '\n')
-        uid = line.split(",")[0]
-        text += line.strip().split(",")[5] + " "
+def duplicateDetection(origin="../data/train/train_status.txt",
+                       output="../data/train/cleaned_train_status.txt"):
+    with codecs.open(origin) as trainLines, \
+            open(output, 'w') as data_cleaned_train_status:
+        vectorizer = CountVectorizer()
         weiboText = []
-        count_vector_tweews = []
-        weiboText.append(line.strip())
+        count_vector_tweets = []
+        text = []
+        uid = ""
+        up_similarity = 0.98
+        num = 0
+        for line in trainLines:
+            if uid == line.split(",")[0]:
+                text.append(line.strip().split(",")[5])
+                weiboText.append(line.strip())
+                continue
+            if len(text) != 0:
+                count_matrixs = vectorizer.fit_transform(text)
+                for i in range(count_matrixs.shape[0]):
+                    count_vector_tweets.append(count_matrixs[i].toarray())
+            if len(count_vector_tweets) != 0:
+                for i in range(len(count_vector_tweets) - 1):
+                    similarity = 0
+                    count_vector_tweet_i = count_vector_tweets[i]
+                    for j in range(i + 1, len(count_vector_tweets)):
+                        count_vector_tweet_j = count_vector_tweets[j]
+                        similarity = getCosine(np.array(count_vector_tweet_i), np.array(count_vector_tweet_j))
+                        if similarity >= up_similarity:
+                            # num += 1
+                            # print num
+                            break
+                    if similarity < up_similarity:
+                        data_cleaned_train_status.write((weiboText[i] + '\n'))
+                data_cleaned_train_status.write(weiboText[len(count_vector_tweets) - 1] + '\n')
+            uid = line.split(",")[0]
+            text = []
+            text.append(line.strip().split(",")[5])
+            weiboText = []
+            count_vector_tweets = []
+            weiboText.append(line.strip())
+
+
+if __name__ == '__main__':
+    duplicateDetection()
