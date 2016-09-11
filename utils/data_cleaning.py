@@ -18,7 +18,7 @@ with open("/home/qibai/Documents/PycharmProjects/smp2016/data/train/train_status
     vectorizer = CountVectorizer()
     weiboText = []
     count_vector_tweews = []
-    text = ""
+    text = "" 
     uid = ""
     up_similarity = 0.9
     for line in trainLines:
