@@ -60,7 +60,6 @@ def flag2Gender(flag):
 # 将省份映射至地区编号
 def province2Num(province):
     province2Num_dict = {
-        2333: ['None'],
         0: ['辽宁', '吉林', '黑龙江'],
         1: ['河北', '山西', '内蒙古', '北京', '天津', '内蒙古自治区'],
         2: ['山东', '江苏', '安徽', '浙江', '台湾', '福建', '江西', '上海'],
@@ -68,7 +67,8 @@ def province2Num(province):
         4: ['广东', '广西', '海南', '香港', '澳门', '广西壮族自治区'],
         5: ['云南', '贵州', '四川', '重庆', '西藏', '西藏自治区'],
         6: ['新疆', '陕西', '宁夏', '青海', '甘肃', '宁夏回族自治区', '新疆维吾尔自治区'],
-        7: ['海外']
+        7: ['海外'],
+        8: ['None']
     }
 
     num = 2333
@@ -91,7 +91,7 @@ def num2Area(num):
         5: '西南',
         6: '西北',
         7: '境外',
-        2333: 'None'
+        8: 'None'
     }
     return num2Area_dict[num]
 
@@ -103,7 +103,7 @@ def resultEncoding(resultName, outputName):
     province = []
     for row in range(len(result_df)):
         age.append(flag2Age(int(result_df.loc[row, 'age'])))
-        gender.append(gender2Flag(int(result_df.loc[row, 'gender'])))
+        gender.append(flag2Gender(int(result_df.loc[row, 'gender'])))
         province.append(num2Area(int(result_df.loc[row, 'province'])))
     temp_df = pd.DataFrame(columns=['uid', 'age', 'gender', 'province'])
     temp_df.uid = result_df.uid
@@ -133,8 +133,6 @@ def province2area(province):
         location = u'华南'
     elif province in south_west:
         location = u'西南'
-    elif province in south:
-        location = u'华南'
     elif province in north_west:
         location = u'西北'
     else:
@@ -152,5 +150,6 @@ def age2seg(age):
 
 
 if __name__ == '__main__':
-    print num2Area(province2Num('None'))
+    # print num2Area(province2Num('None'))
     # resultEncoding()
+    print province2area(u'黑龙江')
