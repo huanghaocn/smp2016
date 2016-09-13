@@ -11,7 +11,7 @@
 import pandas as pd
 
 bayes_csv = './20160911_067439.csv'
-xgb_csv = '../model-training/temp_xgb.csv'
+xgb_csv = './temp_xgb.csv'
 
 if __name__ == '__main__':
     bayes_df = pd.read_csv(bayes_csv)
