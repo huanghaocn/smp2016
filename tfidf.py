@@ -12,6 +12,8 @@ from utils import maps, preprocessor
 import numpy as np
 import json
 
+import pandas as pd
+
 
 def predict_birthday(x_train, y_train, x_test):
     vectorizer = TfidfVectorizer(max_df=0.1)
@@ -132,6 +134,7 @@ if __name__ == '__main__':
         location_predict = predict_location(location_content, location, location_test_content)
         # location_prob = clf3.predict_proba(location_test)
         # location_prob = np.max(location_prob, axis=1)
+        temp_df = pd.DataFrame(columns=['uid', 'age', 'gender', 'province'])
         for i, uid in enumerate(test_uid):
             if uid in gender_from_info:
                 gender = gender_from_info[uid]
@@ -139,7 +142,11 @@ if __name__ == '__main__':
                 gender = gender_predict[i]
             print '%s,%s,%s,%s' % (
                 uid, birthday_predict[i], gender, location_predict[i])
-                # uid, birthday_predict[i], gender, 'huibei')
+
+            temp_df.loc[len(temp_df)] = [uid, birthday_predict[i], gender, location_predict[i]]
+        temp_df.to_csv('./temp_bayes.csv', index=False, encoding='utf-8')
+
+            # uid, birthday_predict[i], gender, 'huibei')
             #     print location_prob[i]
             # print json.dumps([location.get_feature_names()[j] for j in birthday_test[i].indices],
             #                  ensure_ascii=False)
