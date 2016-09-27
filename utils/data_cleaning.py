@@ -66,4 +66,4 @@ def duplicateDetection(origin="../data/train/train_status.txt",
 if __name__ == '__main__':
     duplicateDetection(origin="../data/train/train_status.txt",
                        output="../data/train/cleaned_train_status.txt",
-                       up_similarity=0.9)
+                       up_similarity=0.95)
